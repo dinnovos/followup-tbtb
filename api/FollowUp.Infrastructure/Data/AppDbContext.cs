@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
 
     public DbSet<Patient> Patients => Set<Patient>();
     public DbSet<Manager> Managers => Set<Manager>();
+    public DbSet<Contact> Contacts => Set<Contact>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,6 +35,24 @@ public class AppDbContext : DbContext
             // CreatedAt is filled by the database default (SYSUTCDATETIME(), see
             // 002_create_patient_table.sql) -- EF must never send its own value.
             entity.Property(p => p.CreatedAt)
+                .ValueGeneratedOnAdd();
+        });
+
+        modelBuilder.Entity<Contact>(entity =>
+        {
+            entity.ToTable("Contact");
+
+            entity.Property(c => c.Channel)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            entity.Property(c => c.Result)
+                .HasConversion<string>()
+                .HasMaxLength(30);
+
+            // See 003_create_contact_table.sql: CreatedAt has the same DB-generated
+            // default as Patient.CreatedAt.
+            entity.Property(c => c.CreatedAt)
                 .ValueGeneratedOnAdd();
         });
     }

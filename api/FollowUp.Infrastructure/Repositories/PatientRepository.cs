@@ -22,6 +22,18 @@ public class PatientRepository : IPatientRepository
             p.DocumentNumber == documentNumber);
     }
 
+    public async Task<bool> ExistsByIdAsync(int id)
+    {
+        return await _context.Patients.AnyAsync(p => p.Id == id);
+    }
+
+    public async Task<IReadOnlyList<Patient>> GetAllAsync()
+    {
+        return await _context.Patients
+            .OrderBy(p => p.Name)
+            .ToListAsync();
+    }
+
     public async Task AddAsync(Patient patient)
     {
         _context.Patients.Add(patient);
