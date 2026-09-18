@@ -101,7 +101,7 @@ El catálogo cerrado de `Result` resuelve el hallazgo #6. `ManagerId` es, igual 
 
 | Endpoint | Entrada | Salida | Errores |
 |---|---|---|---|
-| `POST /api/patients` (CA-1) | `{ registeredByManagerId, name, country, documentType, documentNumber, phone, email?, city, treatmentStartDate }` | `201` + paciente creado con `id` | `400` campo obligatorio faltante o inválido; `409` si `(country, documentType, documentNumber)` ya existe |
+| `POST /api/patients` (CA-1) | `{ registeredByManagerId, name, country, documentType, documentNumber, phone, email?, city, treatmentStartDate }` | `201` + paciente creado con `id` | `400` campo obligatorio faltante o inválido, o si `registeredByManagerId` no corresponde a un gestor existente; `409` si `(country, documentType, documentNumber)` ya existe |
 | `GET /api/patients/{id}` (soporte) | — | `200` + datos del paciente y sus contactos | `404` si no existe |
 | `POST /api/patients/{patientId}/contacts` (CA-2) | `{ managerId, contactDate, channel, result, notes? }` | `201` + contacto creado | `404` paciente inexistente; `400` canal/resultado fuera del catálogo o fecha inválida |
 | `PUT /api/contacts/{id}` (CA-3) | `{ correctedByManagerId, reason, contactDate?, channel?, result?, notes? }` | `200` + contacto actualizado | `404` contacto inexistente; `400` si `reason` está vacío o no se envía ningún campo a corregir |
