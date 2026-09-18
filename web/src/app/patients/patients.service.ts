@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { CreatePatientRequest, Manager, Patient } from './patient.model';
+import { Contact, CreateContactRequest } from './contact.model';
+import { CreatePatientRequest, Manager, Patient, PatientListItem } from './patient.model';
 
 const API_URL = 'http://localhost:5129/api';
 
@@ -14,7 +15,15 @@ export class PatientsService {
     return this.http.get<Manager[]>(`${API_URL}/managers`);
   }
 
+  getPatients(): Observable<PatientListItem[]> {
+    return this.http.get<PatientListItem[]>(`${API_URL}/patients`);
+  }
+
   registerPatient(request: CreatePatientRequest): Observable<Patient> {
     return this.http.post<Patient>(`${API_URL}/patients`, request);
+  }
+
+  registerContact(patientId: number, request: CreateContactRequest): Observable<Contact> {
+    return this.http.post<Contact>(`${API_URL}/patients/${patientId}/contacts`, request);
   }
 }

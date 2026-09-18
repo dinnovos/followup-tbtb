@@ -3,16 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-import { CreatePatientRequest, Manager } from '../patient.model';
+import { CreateContactRequest } from '../contact.model';
+import { Manager, PatientListItem } from '../patient.model';
 import { PatientsService } from '../patients.service';
 
 @Component({
-  selector: 'app-patient-registration',
+  selector: 'app-contact-registration',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
-  templateUrl: './patient-registration.component.html'
+  templateUrl: './contact-registration.component.html'
 })
-export class PatientRegistrationComponent implements OnInit {
+export class ContactRegistrationComponent implements OnInit {
+  patients: PatientListItem[] = [];
   managers: Manager[] = [];
   successMessage: string | null = null;
   errorMessage: string | null = null;
@@ -24,19 +26,21 @@ export class PatientRegistrationComponent implements OnInit {
     private readonly patientsService: PatientsService
   ) {
     this.form = this.formBuilder.group({
-      registeredByManagerId: [null, Validators.required],
-      name: ['', [Validators.required, Validators.maxLength(150)]],
-      country: ['', Validators.required],
-      documentType: ['', Validators.required],
-      documentNumber: ['', [Validators.required, Validators.maxLength(20)]],
-      phone: ['', [Validators.required, Validators.maxLength(20)]],
-      email: ['', [Validators.email, Validators.maxLength(150)]],
-      city: ['', [Validators.required, Validators.maxLength(100)]],
-      treatmentStartDate: ['', Validators.required]
+      patientId: [null, Validators.required],
+      managerId: [null, Validators.required],
+      contactDate: ['', Validators.required],
+      channel: ['', Validators.required],
+      result: ['', Validators.required],
+      notes: ['', Validators.maxLength(500)]
     });
   }
 
   ngOnInit(): void {
+    this.patientsService.getPatients().subscribe({
+      next: (patients) => (this.patients = patients),
+      error: () => (this.errorMessage = 'No se pudo cargar la lista de pacientes.')
+    });
+
     this.patientsService.getManagers().subscribe({
       next: (managers) => (this.managers = managers),
       error: () => (this.errorMessage = 'No se pudo cargar la lista de gestores.')
@@ -53,11 +57,11 @@ export class PatientRegistrationComponent implements OnInit {
       return;
     }
 
-    const request = this.form.getRawValue() as CreatePatientRequest;
+    const { patientId, ...request } = this.form.getRawValue();
 
-    this.patientsService.registerPatient(request).subscribe({
-      next: (patient) => {
-        this.successMessage = `Paciente registrado con id ${patient.id}.`;
+    this.patientsService.registerContact(patientId, request as CreateContactRequest).subscribe({
+      next: () => {
+        this.successMessage = 'Contacto registrado correctamente.';
         this.form.reset();
       },
       error: (response) => {

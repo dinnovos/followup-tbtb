@@ -32,3 +32,9 @@ export interface Patient {
   treatmentStartDate: string;
   createdAt: string;
 }
+
+export interface PatientListItem {
+  id: number;
+  name: string;
+  documentNumber: string;
+}

@@ -1,0 +1,70 @@
+<div class="max-w-lg mx-auto mt-10 p-6 bg-white rounded shadow">
+  <h1 class="text-2xl font-bold mb-4">Registrar contacto</h1>
+
+  <div *ngIf="successMessage" class="mb-4 p-3 bg-green-100 text-green-800 rounded">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-100 text-red-800 rounded">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium">Paciente</label>
+      <select formControlName="patientId" class="w-full border rounded p-2">
+        <option [ngValue]="null" disabled>Selecciona un paciente</option>
+        <option *ngFor="let patient of patients" [ngValue]="patient.id">
+          {{ patient.name }} ({{ patient.documentNumber }})
+        </option>
+      </select>
+      <p *ngIf="patients.length === 0" class="text-sm text-gray-500">No hay pacientes disponibles.</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Gestor</label>
+      <select formControlName="managerId" class="w-full border rounded p-2">
+        <option [ngValue]="null" disabled>Selecciona un gestor</option>
+        <option *ngFor="let manager of managers" [ngValue]="manager.id">{{ manager.name }}</option>
+      </select>
+      <p *ngIf="managers.length === 0" class="text-sm text-gray-500">No hay gestores disponibles.</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Fecha de contacto</label>
+      <input type="date" formControlName="contactDate" class="w-full border rounded p-2" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Canal</label>
+      <select formControlName="channel" class="w-full border rounded p-2">
+        <option value="" disabled>Selecciona un canal</option>
+        <option value="Call">Llamada</option>
+        <option value="WhatsApp">WhatsApp</option>
+        <option value="Email">Correo</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Resultado</label>
+      <select formControlName="result" class="w-full border rounded p-2">
+        <option value="" disabled>Selecciona un resultado</option>
+        <option value="Answered">Contestó</option>
+        <option value="NotAnswered">No contestó</option>
+        <option value="DeclinedFollowUp">Rechazó seguimiento</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Notas (opcional)</label>
+      <textarea formControlName="notes" class="w-full border rounded p-2" rows="3"></textarea>
+      <p *ngIf="fieldErrors['notes']" class="text-sm text-red-600">{{ fieldErrors['notes'][0] }}</p>
+    </div>
+
+    <button type="submit" class="w-full bg-blue-600 text-white rounded p-2 font-medium">
+      Registrar contacto
+    </button>
+  </form>
+
+  <a routerLink="/" class="block text-center text-sm text-blue-600 mt-4">Volver a registro de paciente</a>
+</div>
