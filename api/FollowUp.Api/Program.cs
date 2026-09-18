@@ -21,6 +21,7 @@ builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPatientService, PatientService>();
 
 builder.Services.AddExceptionHandler<DuplicatePatientExceptionHandler>();
+builder.Services.AddExceptionHandler<DatabaseConstraintExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
