@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Tbtb.Api/Tbtb.Api.csproj" />
+  <Project Path="Tbtb.Application.Tests/Tbtb.Application.Tests.csproj" />
+  <Project Path="Tbtb.Application/Tbtb.Application.csproj" />
+  <Project Path="Tbtb.Infrastructure/Tbtb.Infrastructure.csproj" />
+</Solution>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tbtb.Application\Tbtb.Application.csproj" />
+    <ProjectReference Include="..\Tbtb.Infrastructure\Tbtb.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- This dev machine only has the .NET 10 ASP.NET Core runtime installed (no 8.x).
+         RollForward lets the net8.0-targeted app run here; it is a no-op on a machine
+         that actually has the 8.x runtime, like the team's real environment. -->
+    <RollForward>LatestMajor</RollForward>
+  </PropertyGroup>
+
+</Project>
