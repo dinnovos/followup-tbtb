@@ -1,5 +1,6 @@
 using FollowUp.Api.Dtos;
 using FollowUp.Application.Entities;
+using FollowUp.Application.Repositories;
 using FollowUp.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +11,20 @@ namespace FollowUp.Api.Controllers;
 public class ContactsController : ControllerBase
 {
     private readonly IContactService _contactService;
+    private readonly IContactRepository _contactRepository;
 
-    public ContactsController(IContactService contactService)
+    public ContactsController(IContactService contactService, IContactRepository contactRepository)
     {
         _contactService = contactService;
+        _contactRepository = contactRepository;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetHistoryByPatientId(int patientId)
+    {
+        var history = await _contactRepository.GetHistoryByPatientIdAsync(patientId);
+        var response = history.Select(ContactWithHistoryResponse.FromEntity);
+        return Ok(response);
     }
 
     [HttpPost]
@@ -35,5 +46,24 @@ public class ContactsController : ControllerBase
         var response = ContactResponse.FromEntity(registered);
 
         return Created($"/api/patients/{patientId}/contacts/{response.Id}", response);
+    }
+
+    // Absolute route ("/api/contacts/{id}"): this action does not live under
+    // /api/patients/{patientId}/... like Register does above -- the contract
+    // (02-plan.md) puts correction at the contact's own root, not nested.
+    [HttpPut("/api/contacts/{id}")]
+    public async Task<IActionResult> Correct(int id, CorrectContactRequest request)
+    {
+        var corrected = await _contactService.CorrectAsync(
+            id,
+            request.CorrectedByManagerId,
+            request.Reason,
+            request.ContactDate,
+            request.Channel,
+            request.Result,
+            request.Notes);
+
+        var response = ContactResponse.FromEntity(corrected);
+        return Ok(response);
     }
 }

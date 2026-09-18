@@ -28,6 +28,7 @@ builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddExceptionHandler<DuplicatePatientExceptionHandler>();
 builder.Services.AddExceptionHandler<DatabaseConstraintExceptionHandler>();
 builder.Services.AddExceptionHandler<PatientNotFoundExceptionHandler>();
+builder.Services.AddExceptionHandler<ContactNotFoundExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 // The Angular dev server (localhost:4200) and this Api (localhost:5129) are
