@@ -107,8 +107,11 @@ El catálogo cerrado de `Result` resuelve el hallazgo #6. `ManagerId` es, igual 
 | `PUT /api/contacts/{id}` (CA-3) | `{ correctedByManagerId, reason, contactDate?, channel?, result?, notes? }` | `200` + contacto actualizado | `404` contacto inexistente; `400` si `reason` está vacío o no se envía ningún campo a corregir |
 | `GET /api/patients/{patientId}/contacts` (consulta con criterio, apoyo) | — | `200` + lista de contactos del paciente, cada uno con indicador de si tiene correcciones | `404` paciente inexistente |
 | `GET /api/managers` (soporte) | — | `200` + lista de gestores (`id`, `name`) | — |
+| `GET /api/patients` (soporte) | — | `200` + lista de pacientes (`id`, `name`, `documentNumber`) | — |
 
 Se agrega `GET /api/managers` como endpoint de apoyo, no declarado en la versión original de este plan. El formulario de registro de CA-1 necesita un selector de gestores — la decisión de "identidad declarada, no verificada" (hallazgo #1) exige un selector, no un campo numérico de texto libre — y sin este endpoint no hay de dónde obtener esa lista. No es un CA nuevo ni cuenta contra el tope de 2-3 CA: es infraestructura de soporte, con el mismo carácter que `GET /api/patients/{id}` y la consulta de historial de contactos, que ya estaban en el contrato por la misma razón.
+
+Por la misma razón se agrega `GET /api/patients`: el formulario de CA-2 necesita un selector de "¿para cuál paciente?", y no existía ninguna fuente para esa lista. `documentNumber` se incluye junto a `name` para poder distinguir dos pacientes que compartan nombre.
 
 DTOs propios en la frontera del API (nunca se expone la entidad de EF Core directamente), por la regla estricta de separación de capas.
 
