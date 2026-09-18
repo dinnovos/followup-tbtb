@@ -13,7 +13,7 @@ no se declara "cero uso de IA" porque no sería cierto.
 |---|---|---|---|
 | CA-1 | `8e96d21` (scripts `001`/`002`), `933c617` (`Patient`, `PatientService`), `2ff5a85` (EF Core, `PatientsController`), `aa61e01` (manejo de errores de restricción), `21645ee` (seed), `d1414ea` (`GET /api/managers`, CORS), `f0fca37` (formulario Angular), `a5d1c1f` (corrección de nulabilidad) | `PatientServiceTests.cs`: `CA1_RegisterNewPatient_IsAddedSuccessfully`, `CA1_RegisterDuplicatePatient_ThrowsDuplicatePatientException` | Cubierto |
 | CA-2 | `98593fc` (`Contact`, `ContactService`), `3589869` (EF Core), `9b19592` (`ContactsController`, `GET /api/patients`), `168fcc8` (formulario Angular) | `ContactServiceTests.cs`: `CA2_RegisterContact_IsAddedSuccessfully`, `CA2_RegisterContactForNonexistentPatient_ThrowsPatientNotFoundException` | Cubierto |
-| CA-3 | — | — | Fuera de alcance (todavía — en construcción) |
+| CA-3 | `40c7c25` (`ContactCorrection`, `ContactHistory`, repositorio/servicio), `3be835f` (tests), `a050740` (`ContactsController`, manejo de errores), `b13c579` (pantallas Angular) | `ContactServiceTests.cs`: `CA3_CorrectContact_UpdatesContactAndRecordsCorrection`, `CA3_CorrectContactWithNoFieldsProvided_ThrowsArgumentException`, `CA3_CorrectNonexistentContact_ThrowsContactNotFoundException` | Cubierto |
 | CA-4, CA-5, CA-6 | — | — | Fuera de alcance (justificado en `02-plan.md`, sección 2) |
 
 ## Registro de decisiones y uso de IA
@@ -75,3 +75,32 @@ no se declara "cero uso de IA" porque no sería cierto.
   indistinguible de su primer valor real (`Country` vacío se ve igual que `Colombia`). Se
   corrigió cambiando los campos a tipos anulables (commit `a5d1c1f`), verificado en vivo:
   omitir el campo ahora falla con `400`; enviar el valor explícito sigue funcionando igual.
+- La "consulta con criterio" exigida por el stack se resolvió en `ContactRepository.
+  GetHistoryByPatientIdAsync`: una sola expresión LINQ con un `Select` anidado (subconsultas
+  correlacionadas) que combina `Contact` + `ContactCorrection` + `Manager`, resolviendo el
+  nombre real del gestor que corrigió en vez de exponer solo su id. Verificado en vivo contra
+  SQL Server real: se creó y corrigió un contacto de prueba con dos gestores distintos
+  (registrado por uno, corregido por otro) y la consulta devolvió el nombre correcto de quien
+  corrigió, no de quien registró.
+- Se lanzaron de nuevo 3 agentes en paralelo a auditar el código de CA-3 (seguridad,
+  correctitud, cumplimiento de `CLAUDE.md`). Pedido explícito de Jorge, mismo patrón que en
+  CA-1/CA-2.
+- **Corrección a la IA (4):** la auditoría de correctitud encontró que la regla "al menos un
+  campo a corregir" solo vivía en `CorrectContactRequest.Validate()` (frontera del API); si
+  `ContactService.CorrectAsync` se llamara directo sin pasar por ese DTO, se guardaría una
+  `ContactCorrection` sin cambio real, pisando `UpdatedAt` sin motivo. Se agregó la misma
+  validación como guarda dentro del servicio (`ArgumentException`), y se corrigió el test
+  existente que sin querer dependía de ese hueco (usaba los 4 campos `null` solo para simular
+  "contacto no encontrado"). Se agregó también `.FirstOrDefault()` en vez de `.First()` sobre
+  `Managers` en la consulta con criterio, por robustez, aunque la FK ya impide el caso huérfano.
+- Se verificó, releyendo el texto literal de `01-hallazgos.md` antes de proponer nada nuevo
+  (regla de doble verificación de `CLAUDE.md`), que la falta de autenticación aplicada a
+  `CorrectedByManagerId` **ya** estaba cubierta por el hallazgo #1 y por la decisión ya
+  registrada arriba sobre `Contact`/`ContactCorrection` como identidad declarada y no
+  verificada — no hizo falta agregar nada nuevo a los hallazgos ni a esta bitácora por ese
+  punto.
+- El frontend de CA-3 (`patient-detail`, `contact-correction`) se verificó con Playwright
+  (headless), igual que CA-1/CA-2: se probó el flujo completo (ver historial → expandir
+  correcciones → corregir → volver) y, a diferencia de CA-1/CA-2, también el caso de error de
+  punta a punta: enviar el formulario de corrección sin ningún campo dispara la validación de
+  grupo en el navegador ("Debes corregir al menos un campo") antes de llegar al API.
