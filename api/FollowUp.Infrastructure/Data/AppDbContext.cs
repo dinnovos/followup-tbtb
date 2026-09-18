@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<Patient> Patients => Set<Patient>();
     public DbSet<Manager> Managers => Set<Manager>();
     public DbSet<Contact> Contacts => Set<Contact>();
+    public DbSet<ContactCorrection> ContactCorrections => Set<ContactCorrection>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,6 +54,24 @@ public class AppDbContext : DbContext
             // See 003_create_contact_table.sql: CreatedAt has the same DB-generated
             // default as Patient.CreatedAt.
             entity.Property(c => c.CreatedAt)
+                .ValueGeneratedOnAdd();
+        });
+
+        modelBuilder.Entity<ContactCorrection>(entity =>
+        {
+            entity.ToTable("ContactCorrection");
+
+            entity.Property(cc => cc.PreviousChannel)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+
+            entity.Property(cc => cc.PreviousResult)
+                .HasConversion<string>()
+                .HasMaxLength(30);
+
+            // See 004_create_contact_correction_table.sql: CorrectionDate has the
+            // same DB-generated default as Contact.CreatedAt.
+            entity.Property(cc => cc.CorrectionDate)
                 .ValueGeneratedOnAdd();
         });
     }
