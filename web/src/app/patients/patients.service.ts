@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { Contact, CreateContactRequest } from './contact.model';
+import { Contact, ContactWithHistory, CorrectContactRequest, CreateContactRequest } from './contact.model';
 import { CreatePatientRequest, Manager, Patient, PatientListItem } from './patient.model';
 
 const API_URL = 'http://localhost:5129/api';
@@ -25,5 +25,13 @@ export class PatientsService {
 
   registerContact(patientId: number, request: CreateContactRequest): Observable<Contact> {
     return this.http.post<Contact>(`${API_URL}/patients/${patientId}/contacts`, request);
+  }
+
+  getContactHistory(patientId: number): Observable<ContactWithHistory[]> {
+    return this.http.get<ContactWithHistory[]>(`${API_URL}/patients/${patientId}/contacts`);
+  }
+
+  correctContact(contactId: number, request: CorrectContactRequest): Observable<Contact> {
+    return this.http.put<Contact>(`${API_URL}/contacts/${contactId}`, request);
   }
 }

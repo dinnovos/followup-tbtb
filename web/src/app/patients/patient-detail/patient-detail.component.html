@@ -1,0 +1,115 @@
+<div class="max-w-3xl mx-auto mt-10 p-6 bg-white rounded shadow">
+  <h1 class="text-2xl font-bold mb-4">Historial de contactos</h1>
+
+  <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-100 text-red-800 rounded">
+    {{ errorMessage }}
+  </div>
+
+  <div class="mb-6">
+    <label class="block text-sm font-medium">Paciente</label>
+    <select
+      [(ngModel)]="selectedPatientId"
+      (ngModelChange)="onPatientChange()"
+      class="w-full border rounded p-2"
+    >
+      <option [ngValue]="null" disabled>Selecciona un paciente</option>
+      <option *ngFor="let patient of patients" [ngValue]="patient.id">
+        {{ patient.name }} ({{ patient.documentNumber }})
+      </option>
+    </select>
+  </div>
+
+  <p *ngIf="selectedPatientId !== null && contacts.length === 0" class="text-sm text-gray-500">
+    Este paciente no tiene contactos registrados.
+  </p>
+
+  <table *ngIf="contacts.length > 0" class="w-full text-sm border-collapse">
+    <thead>
+      <tr class="text-left border-b">
+        <th class="py-2">Fecha</th>
+        <th class="py-2">Canal</th>
+        <th class="py-2">Resultado</th>
+        <th class="py-2">Notas</th>
+        <th class="py-2">Corregido</th>
+        <th class="py-2"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let contact of contacts">
+        <tr class="border-b">
+          <td class="py-2">{{ contact.contactDate | date: 'dd/MM/yyyy' }}</td>
+          <td class="py-2">{{ channelLabel(contact.channel) }}</td>
+          <td class="py-2">{{ resultLabel(contact.result) }}</td>
+          <td class="py-2">{{ contact.notes || '—' }}</td>
+          <td class="py-2">
+            <button
+              *ngIf="contact.corrections.length > 0"
+              type="button"
+              (click)="toggleHistory(contact.id)"
+              class="text-blue-600 underline"
+            >
+              Sí ({{ contact.corrections.length }})
+            </button>
+            <span *ngIf="contact.corrections.length === 0">No</span>
+          </td>
+          <td class="py-2 text-right">
+            <a
+              [routerLink]="['/contactos', contact.id, 'corregir']"
+              [queryParams]="{ patientId: selectedPatientId }"
+              class="text-blue-600 underline"
+            >
+              Corregir
+            </a>
+          </td>
+        </tr>
+        <tr *ngIf="expandedContactId === contact.id">
+          <td colspan="6" class="bg-gray-50 p-4">
+            <p class="font-medium text-sm mb-3">Historial de correcciones</p>
+            <div class="space-y-3">
+              <div
+                *ngFor="let correction of contact.corrections; let i = index"
+                class="bg-white border rounded p-3 text-xs"
+              >
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-medium text-sm">{{ correction.correctedByManagerName }}</span>
+                  <span class="text-gray-500">{{ correction.correctionDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+                <p class="text-gray-700 mb-2">"{{ correction.reason }}"</p>
+
+                <ng-container *ngIf="correctionDiff(contact, i) as diff">
+                  <ul class="text-gray-700 space-y-0.5">
+                    <li *ngIf="diff.contactDate.changed">
+                      <span class="font-medium text-amber-700">Fecha:</span>
+                      {{ diff.contactDate.before | date: 'dd/MM/yyyy' }} →
+                      {{ diff.contactDate.after | date: 'dd/MM/yyyy' }}
+                    </li>
+                    <li *ngIf="diff.channel.changed">
+                      <span class="font-medium text-amber-700">Canal:</span>
+                      {{ channelLabel(diff.channel.before) }} → {{ channelLabel(diff.channel.after) }}
+                    </li>
+                    <li *ngIf="diff.result.changed">
+                      <span class="font-medium text-amber-700">Resultado:</span>
+                      {{ resultLabel(diff.result.before) }} → {{ resultLabel(diff.result.after) }}
+                    </li>
+                    <li *ngIf="diff.notes.changed">
+                      <span class="font-medium text-amber-700">Notas:</span>
+                      {{ diff.notes.before || '—' }} → {{ diff.notes.after || '—' }}
+                    </li>
+                    <li
+                      *ngIf="!diff.contactDate.changed && !diff.channel.changed && !diff.result.changed && !diff.notes.changed"
+                      class="text-gray-400"
+                    >
+                      Ningún dato cambió con esta corrección (solo se registró el motivo).
+                    </li>
+                  </ul>
+                </ng-container>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+    </tbody>
+  </table>
+
+  <a routerLink="/" class="block text-center text-sm text-blue-600 mt-6">Volver a registro de paciente</a>
+</div>

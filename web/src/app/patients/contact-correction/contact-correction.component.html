@@ -1,0 +1,114 @@
+<div class="max-w-lg mx-auto mt-10 p-6 bg-white rounded shadow">
+  <h1 class="text-2xl font-bold mb-4">Corregir contacto #{{ contactId }}</h1>
+
+  <div *ngIf="successMessage" class="mb-4 p-3 bg-green-100 text-green-800 rounded">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-100 text-red-800 rounded">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium">Corregido por</label>
+      <select formControlName="correctedByManagerId" class="w-full border rounded p-2">
+        <option [ngValue]="null" disabled>Selecciona un gestor</option>
+        <option *ngFor="let manager of managers" [ngValue]="manager.id">{{ manager.name }}</option>
+      </select>
+      <p
+        *ngIf="form.get('correctedByManagerId')?.invalid && form.get('correctedByManagerId')?.touched"
+        class="text-sm text-red-600"
+      >
+        Debes seleccionar quién hace la corrección.
+      </p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Motivo de la corrección</label>
+      <textarea formControlName="reason" class="w-full border rounded p-2" rows="2"></textarea>
+      <p
+        *ngIf="form.get('reason')?.invalid && form.get('reason')?.touched"
+        class="text-sm text-red-600"
+      >
+        El motivo es obligatorio (máximo 300 caracteres).
+      </p>
+      <p *ngIf="fieldErrors['reason']" class="text-sm text-red-600">{{ fieldErrors['reason'][0] }}</p>
+    </div>
+
+    <p class="text-sm text-gray-500">
+      Estos son los valores actuales del contacto. Cambia lo que quieras corregir; lo que dejes
+      igual no se modifica.
+    </p>
+
+    <div>
+      <label class="block text-sm font-medium">Fecha de contacto</label>
+      <input type="date" formControlName="contactDate" class="w-full border rounded p-2" />
+      <p
+        *ngIf="form.get('contactDate')?.invalid && form.get('contactDate')?.touched"
+        class="text-sm text-red-600"
+      >
+        La fecha no puede quedar vacía.
+      </p>
+      <p *ngIf="contactDateChanged" class="text-xs text-amber-700 mt-1">
+        Modificado (antes: {{ originalContactDate | date: 'dd/MM/yyyy' }})
+      </p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Canal</label>
+      <select formControlName="channel" class="w-full border rounded p-2">
+        <option value="" disabled>Cargando...</option>
+        <option value="Call">Llamada</option>
+        <option value="WhatsApp">WhatsApp</option>
+        <option value="Email">Correo</option>
+      </select>
+      <p *ngIf="channelChanged" class="text-xs text-amber-700 mt-1">
+        Modificado (antes: {{ channelLabel(originalChannel) }})
+      </p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Resultado</label>
+      <select formControlName="result" class="w-full border rounded p-2">
+        <option value="" disabled>Cargando...</option>
+        <option value="Answered">Contestó</option>
+        <option value="NotAnswered">No contestó</option>
+        <option value="DeclinedFollowUp">Rechazó seguimiento</option>
+      </select>
+      <p *ngIf="resultChanged" class="text-xs text-amber-700 mt-1">
+        Modificado (antes: {{ resultLabel(originalResult) }})
+      </p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Notas</label>
+      <textarea formControlName="notes" class="w-full border rounded p-2" rows="3"></textarea>
+      <p class="text-xs text-gray-500 mt-1">Bórralas si quieres dejarlas vacías.</p>
+      <p *ngIf="notesChanged" class="text-xs text-amber-700 mt-1">
+        Modificado (antes: {{ originalNotes || '—' }})
+      </p>
+      <p *ngIf="fieldErrors['notes']" class="text-sm text-red-600">{{ fieldErrors['notes'][0] }}</p>
+    </div>
+
+    <p *ngIf="form.errors?.['noFieldsProvided'] && form.touched" class="text-sm text-red-600">
+      No cambiaste ningún valor todavía.
+    </p>
+
+    <button
+      type="submit"
+      [disabled]="!contactLoaded"
+      class="w-full bg-blue-600 text-white rounded p-2 font-medium disabled:bg-gray-300"
+    >
+      Guardar corrección
+    </button>
+  </form>
+
+  <a
+    [routerLink]="['/pacientes/historial']"
+    [queryParams]="patientId !== null ? { patientId } : {}"
+    class="block text-center text-sm text-blue-600 mt-4"
+  >
+    Volver al historial
+  </a>
+</div>
