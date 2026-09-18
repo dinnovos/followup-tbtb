@@ -11,8 +11,8 @@ no se declara "cero uso de IA" porque no sería cierto.
 
 | Criterio | Commit / archivos | Prueba | Estado |
 |---|---|---|---|
-| CA-1 | `8e96d21` (scripts `001`/`002`), `933c617` (`Patient`, `PatientService`), `2ff5a85` (EF Core, `PatientsController`), `aa61e01` (manejo de errores de restricción), `21645ee` (seed), `d1414ea` (`GET /api/managers`, CORS), `f0fca37` (formulario Angular) | `PatientServiceTests.cs`: `CA1_RegisterNewPatient_IsAddedSuccessfully`, `CA1_RegisterDuplicatePatient_ThrowsDuplicatePatientException` | Cubierto |
-| CA-2 | — | — | Fuera de alcance (todavía — en construcción) |
+| CA-1 | `8e96d21` (scripts `001`/`002`), `933c617` (`Patient`, `PatientService`), `2ff5a85` (EF Core, `PatientsController`), `aa61e01` (manejo de errores de restricción), `21645ee` (seed), `d1414ea` (`GET /api/managers`, CORS), `f0fca37` (formulario Angular), `a5d1c1f` (corrección de nulabilidad) | `PatientServiceTests.cs`: `CA1_RegisterNewPatient_IsAddedSuccessfully`, `CA1_RegisterDuplicatePatient_ThrowsDuplicatePatientException` | Cubierto |
+| CA-2 | `98593fc` (`Contact`, `ContactService`), `3589869` (EF Core), `9b19592` (`ContactsController`, `GET /api/patients`), `168fcc8` (formulario Angular) | `ContactServiceTests.cs`: `CA2_RegisterContact_IsAddedSuccessfully`, `CA2_RegisterContactForNonexistentPatient_ThrowsPatientNotFoundException` | Cubierto |
 | CA-3 | — | — | Fuera de alcance (todavía — en construcción) |
 | CA-4, CA-5, CA-6 | — | — | Fuera de alcance (justificado en `02-plan.md`, sección 2) |
 
@@ -63,3 +63,15 @@ no se declara "cero uso de IA" porque no sería cierto.
   en vez de solo confiar en que compilara — se instaló Chromium y se confirmó que el `<select>`
   de gestores carga los 3 gestores reales desde la API, sin errores de consola. Decisión de
   Claude de no declarar la UI funcionando sin evidencia visual real.
+- Se anticipó el endpoint `GET /api/patients` desde el plan de CA-2, en vez de descubrirlo a
+  mitad de camino como pasó con `GET /api/managers` en CA-1 — aplicando lo ya aprendido.
+- Se decidió que "paciente inexistente" (404, viene de la URL) y "gestor inexistente" (400,
+  viene del cuerpo) necesitan manejo distinto, aunque los dos son violaciones de FK — se
+  construyó `PatientNotFoundException` en vez de reutilizar el manejador genérico existente.
+- Se lanzaron de nuevo 3 agentes en paralelo a auditar el código de CA-2 (seguridad,
+  cumplimiento, correctitud técnica). Pedido explícito de Jorge.
+- **Corrección a la IA (3/3 o más):** los agentes encontraron que un campo enum/fecha omitido
+  pasaba silenciosamente en vez de fallar, porque el valor "vacío" de un enum en C# es
+  indistinguible de su primer valor real (`Country` vacío se ve igual que `Colombia`). Se
+  corrigió cambiando los campos a tipos anulables (commit `a5d1c1f`), verificado en vivo:
+  omitir el campo ahora falla con `400`; enviar el valor explícito sigue funcionando igual.
