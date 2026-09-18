@@ -1,0 +1,27 @@
+# .NET
+api/bin/
+api/obj/
+**/bin/
+**/obj/
+*.user
+
+# Angular / Node
+web/node_modules/
+web/dist/
+node_modules/
+npm-debug.log*
+
+# IDE
+.vs/
+.vscode/
+*.suo
+
+# Environment / secrets
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/.env
+!**/.env.example
+
+# Working documents not part of the graded deliverable
+Prueba_Tecnica_Desarrollador_TBTB_2.pdf
+CLAUDE.md
