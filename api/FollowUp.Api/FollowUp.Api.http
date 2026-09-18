@@ -1,0 +1,16 @@
+@FollowUp.Api_HostAddress = http://localhost:5129
+
+### CA-1: register a patient (added once the endpoint exists)
+# POST {{FollowUp.Api_HostAddress}}/api/patients
+# Content-Type: application/json
+#
+# {
+#   "registeredByManagerId": 1,
+#   "name": "Test Patient",
+#   "country": "Colombia",
+#   "documentType": "CC",
+#   "documentNumber": "123456",
+#   "phone": "3000000000",
+#   "city": "Bogota",
+#   "treatmentStartDate": "2026-01-01"
+# }

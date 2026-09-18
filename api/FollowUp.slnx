@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="FollowUp.Api/FollowUp.Api.csproj" />
+  <Project Path="FollowUp.Application.Tests/FollowUp.Application.Tests.csproj" />
+  <Project Path="FollowUp.Application/FollowUp.Application.csproj" />
+  <Project Path="FollowUp.Infrastructure/FollowUp.Infrastructure.csproj" />
+</Solution>
