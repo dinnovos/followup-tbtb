@@ -1,0 +1,87 @@
+<div class="max-w-lg mx-auto mt-10 p-6 bg-white rounded shadow">
+  <h1 class="text-2xl font-bold mb-4">Registro de paciente</h1>
+
+  <div *ngIf="successMessage" class="mb-4 p-3 bg-green-100 text-green-800 rounded">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="mb-4 p-3 bg-red-100 text-red-800 rounded">
+    {{ errorMessage }}
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium">Gestor</label>
+      <select formControlName="registeredByManagerId" class="w-full border rounded p-2">
+        <option [ngValue]="null" disabled>Selecciona un gestor</option>
+        <option *ngFor="let manager of managers" [ngValue]="manager.id">{{ manager.name }}</option>
+      </select>
+      <p *ngIf="managers.length === 0" class="text-sm text-gray-500">No hay gestores disponibles.</p>
+      <p *ngIf="fieldErrors['registeredByManagerId']" class="text-sm text-red-600">
+        {{ fieldErrors['registeredByManagerId'][0] }}
+      </p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Nombre</label>
+      <input type="text" formControlName="name" class="w-full border rounded p-2" />
+      <p *ngIf="fieldErrors['name']" class="text-sm text-red-600">{{ fieldErrors['name'][0] }}</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">País</label>
+      <select formControlName="country" class="w-full border rounded p-2">
+        <option value="" disabled>Selecciona un país</option>
+        <option value="Colombia">Colombia</option>
+        <option value="Peru">Perú</option>
+        <option value="Ecuador">Ecuador</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Tipo de documento</label>
+      <select formControlName="documentType" class="w-full border rounded p-2">
+        <option value="" disabled>Selecciona un tipo</option>
+        <option value="CC">Cédula de ciudadanía (CC)</option>
+        <option value="DNI">DNI</option>
+        <option value="CI">Cédula de identidad (CI)</option>
+        <option value="Passport">Pasaporte</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Número de documento</label>
+      <input type="text" formControlName="documentNumber" class="w-full border rounded p-2" />
+      <p *ngIf="fieldErrors['documentNumber']" class="text-sm text-red-600">
+        {{ fieldErrors['documentNumber'][0] }}
+      </p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Teléfono</label>
+      <input type="text" formControlName="phone" class="w-full border rounded p-2" />
+      <p *ngIf="fieldErrors['phone']" class="text-sm text-red-600">{{ fieldErrors['phone'][0] }}</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Correo (opcional)</label>
+      <input type="email" formControlName="email" class="w-full border rounded p-2" />
+      <p *ngIf="fieldErrors['email']" class="text-sm text-red-600">{{ fieldErrors['email'][0] }}</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Ciudad</label>
+      <input type="text" formControlName="city" class="w-full border rounded p-2" />
+      <p *ngIf="fieldErrors['city']" class="text-sm text-red-600">{{ fieldErrors['city'][0] }}</p>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Fecha de inicio de tratamiento</label>
+      <input type="date" formControlName="treatmentStartDate" class="w-full border rounded p-2" />
+    </div>
+
+    <button type="submit" class="w-full bg-blue-600 text-white rounded p-2 font-medium">
+      Registrar paciente
+    </button>
+  </form>
+</div>
