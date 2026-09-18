@@ -10,9 +10,15 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Patient> Patients => Set<Patient>();
+    public DbSet<Manager> Managers => Set<Manager>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Manager>(entity =>
+        {
+            entity.ToTable("Manager");
+        });
+
         modelBuilder.Entity<Patient>(entity =>
         {
             entity.ToTable("Patient");
