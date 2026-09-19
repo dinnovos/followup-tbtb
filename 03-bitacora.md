@@ -13,7 +13,7 @@ no se declara "cero uso de IA" porque no sería cierto.
 |---|---|---|---|
 | CA-1 | `8e96d21` (scripts `001`/`002`), `933c617` (`Patient`, `PatientService`), `2ff5a85` (EF Core, `PatientsController`), `aa61e01` (manejo de errores de restricción), `21645ee` (seed), `d1414ea` (`GET /api/managers`, CORS), `f0fca37` (formulario Angular), `a5d1c1f` (corrección de nulabilidad) | `PatientServiceTests.cs`: `CA1_RegisterNewPatient_IsAddedSuccessfully`, `CA1_RegisterDuplicatePatient_ThrowsDuplicatePatientException` | Cubierto |
 | CA-2 | `98593fc` (`Contact`, `ContactService`), `3589869` (EF Core), `9b19592` (`ContactsController`, `GET /api/patients`), `168fcc8` (formulario Angular) | `ContactServiceTests.cs`: `CA2_RegisterContact_IsAddedSuccessfully`, `CA2_RegisterContactForNonexistentPatient_ThrowsPatientNotFoundException` | Cubierto |
-| CA-3 | `40c7c25` (`ContactCorrection`, `ContactHistory`, repositorio/servicio), `3be835f` (tests), `a050740` (`ContactsController`, manejo de errores), `b13c579` (pantallas Angular) | `ContactServiceTests.cs`: `CA3_CorrectContact_UpdatesContactAndRecordsCorrection`, `CA3_CorrectContactWithNoFieldsProvided_ThrowsArgumentException`, `CA3_CorrectNonexistentContact_ThrowsContactNotFoundException` | Cubierto |
+| CA-3 | `40c7c25` (`ContactCorrection`, `ContactHistory`, repositorio/servicio), `3be835f` (tests), `a050740` (`ContactsController`, manejo de errores), `b13c579` (pantallas Angular), `1a1019c` (seed de contactos), `c1a9e0c` (índices de la consulta con criterio), `ed867ce` (404 de paciente inexistente en el historial) | `ContactServiceTests.cs`: `CA3_CorrectContact_UpdatesContactAndRecordsCorrection`, `CA3_CorrectContactWithNoFieldsProvided_ThrowsArgumentException`, `CA3_CorrectNonexistentContact_ThrowsContactNotFoundException`, `CA3_GetHistoryForNonexistentPatient_ThrowsPatientNotFoundException` | Cubierto |
 | CA-4, CA-5, CA-6 | — | — | Fuera de alcance (justificado en `02-plan.md`, sección 2) |
 
 ## Registro de decisiones y uso de IA
@@ -81,7 +81,14 @@ no se declara "cero uso de IA" porque no sería cierto.
   nombre real del gestor que corrigió en vez de exponer solo su id. Verificado en vivo contra
   SQL Server real: se creó y corrigió un contacto de prueba con dos gestores distintos
   (registrado por uno, corregido por otro) y la consulta devolvió el nombre correcto de quien
-  corrigió, no de quien registró.
+  corrigió, no de quien registró. Índices que necesitaría con volumen real (agregados en
+  `007_add_contact_history_indexes.sql`): `Contact.PatientId`, porque es el filtro principal de
+  la consulta y una FK no crea índice por sí sola en SQL Server -- sin él, cada consulta del
+  historial de un paciente escanea toda la tabla `Contact`, cada vez más lenta cuantos más
+  contactos acumule el programa en total (~400 pacientes al arrancar, según el PRD), no solo el
+  paciente consultado; y `ContactCorrection.ContactId`, más crítico aún porque esa búsqueda se
+  repite una vez por cada contacto del paciente (subconsulta correlacionada), multiplicando el
+  costo de un table scan por el número de contactos en vez de una sola vez.
 - Se lanzaron de nuevo 3 agentes en paralelo a auditar el código de CA-3 (seguridad,
   correctitud, cumplimiento de `CLAUDE.md`). Pedido explícito de Jorge, mismo patrón que en
   CA-1/CA-2.
@@ -104,3 +111,38 @@ no se declara "cero uso de IA" porque no sería cierto.
   correcciones → corregir → volver) y, a diferencia de CA-1/CA-2, también el caso de error de
   punta a punta: enviar el formulario de corrección sin ningún campo dispara la validación de
   grupo en el navegador ("Debes corregir al menos un campo") antes de llegar al API.
+- Se releyó el PDF de la prueba completo (`Prueba_Tecnica_Desarrollador_TBTB_2.pdf`), palabra
+  por palabra contra el estado real del repositorio, en vez de confiar en el resumen acumulado
+  de la sesión. Pedido explícito de Jorge. Encontró un requisito textual de la Parte III sin
+  cumplir: "justifica en la bitácora... qué índice necesitaría con volumen real" -- la consulta
+  con criterio ya estaba resuelta, pero esta bitácora nunca mencionó ningún índice. Se cerró
+  agregando el razonamiento arriba y el script `007_add_contact_history_indexes.sql`
+  (`Contact.PatientId`, `ContactCorrection.ContactId`), verificado en una base de datos aislada
+  antes de aceptarlo como resuelto.
+- La misma relectura encontró dos desviaciones entre `02-plan.md` y el código real, ninguna
+  documentada hasta ahora. Decisión de Jorge sobre cómo cerrar cada una, con criterio distinto
+  para cada caso:
+  - **(1) El `404` de paciente inexistente**: el plan lo prometía en
+    `GET /api/patients/{patientId}/contacts`; el código devolvía lista vacía (mismo patrón que
+    `PatientsController.GetAll`, nunca escrito como desviación). Se ajustó el código para cumplir
+    el plan: `IContactService.GetHistoryByPatientIdAsync` ahora valida la existencia del paciente
+    (reutilizando `IPatientRepository.ExistsByIdAsync`, el mismo método de `RegisterAsync`) antes
+    de delegar al repositorio, y lanza `PatientNotFoundException` si no existe -- misma excepción
+    y manejador que ya existían desde CA-2. De paso, `ContactsController` dejó de inyectar
+    `IContactRepository` directamente: las 3 acciones del controlador ahora pasan por
+    `IContactService`, cerrando la última excepción a "la lógica de negocio no vive en el
+    controlador". Cubierto por el test `CA3_GetHistoryForNonexistentPatient_
+    ThrowsPatientNotFoundException` y verificado en vivo (`404` real para un id inexistente,
+    `200` para uno real).
+  - **(2) 3 pantallas planeadas vs. 4 construidas**: el plan describía "Registro", "Detalle de
+    paciente" (historial + registrar contacto + corregir, todo junto) y "Listado". Se construyó,
+    en cambio, "Registro", "Registrar contacto" (pantalla propia), "Historial de contactos" (con
+    selector de paciente inline, fusionando lo que iba a ser listado+detalle) y "Corregir
+    contacto" (pantalla propia con ruta paramétrica). Se decidió **no** rehacer el frontend para
+    calzar con el boceto original: la separación por pantalla actual (una responsabilidad cada
+    una) es más limpia que fusionar registrar+ver+corregir en una sola, y ese boceto se escribió
+    antes de conocer el detalle real de la funcionalidad de corrección (precarga de valores,
+    avisos de "Modificado", diff de qué cambió) -- retroceder a la versión fusionada sacrificaría
+    diseño ya probado solo para coincidir textualmente con un plan anterior. El propio documento
+    de la prueba lo permite explícitamente ("el plan se cierra antes, y cambiarlo después exige
+    decir por qué"); esta entrada es esa justificación.
