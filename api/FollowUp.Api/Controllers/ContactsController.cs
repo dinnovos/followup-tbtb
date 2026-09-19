@@ -1,6 +1,5 @@
 using FollowUp.Api.Dtos;
 using FollowUp.Application.Entities;
-using FollowUp.Application.Repositories;
 using FollowUp.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,18 +10,16 @@ namespace FollowUp.Api.Controllers;
 public class ContactsController : ControllerBase
 {
     private readonly IContactService _contactService;
-    private readonly IContactRepository _contactRepository;
 
-    public ContactsController(IContactService contactService, IContactRepository contactRepository)
+    public ContactsController(IContactService contactService)
     {
         _contactService = contactService;
-        _contactRepository = contactRepository;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetHistoryByPatientId(int patientId)
     {
-        var history = await _contactRepository.GetHistoryByPatientIdAsync(patientId);
+        var history = await _contactService.GetHistoryByPatientIdAsync(patientId);
         var response = history.Select(ContactWithHistoryResponse.FromEntity);
         return Ok(response);
     }

@@ -28,6 +28,21 @@ public class ContactService : IContactService
         return contact;
     }
 
+    // 02-plan.md prometía 404 para este endpoint si el paciente no existe --
+    // se hace la misma validación que RegisterAsync (mismo repositorio, mismo
+    // patrón), en vez de dejar que la consulta con criterio simplemente
+    // devuelva una lista vacía sin distinguir "sin contactos" de "no existe".
+    public async Task<IReadOnlyList<ContactHistory>> GetHistoryByPatientIdAsync(int patientId)
+    {
+        var patientExists = await _patientRepository.ExistsByIdAsync(patientId);
+        if (!patientExists)
+        {
+            throw new PatientNotFoundException(patientId);
+        }
+
+        return await _contactRepository.GetHistoryByPatientIdAsync(patientId);
+    }
+
     public async Task<Contact> CorrectAsync(
         int contactId,
         int correctedByManagerId,

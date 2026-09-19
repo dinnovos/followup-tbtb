@@ -127,4 +127,21 @@ public class ContactServiceTests
             r => r.CorrectAsync(It.IsAny<Contact>(), It.IsAny<ContactCorrection>()),
             Times.Never);
     }
+
+    [Fact]
+    public async Task CA3_GetHistoryForNonexistentPatient_ThrowsPatientNotFoundException()
+    {
+        const int patientId = 999;
+
+        var patientRepository = new Mock<IPatientRepository>();
+        patientRepository.Setup(r => r.ExistsByIdAsync(patientId)).ReturnsAsync(false);
+
+        var contactRepository = new Mock<IContactRepository>();
+        var service = new ContactService(patientRepository.Object, contactRepository.Object);
+
+        await Assert.ThrowsAsync<PatientNotFoundException>(() =>
+            service.GetHistoryByPatientIdAsync(patientId));
+
+        contactRepository.Verify(r => r.GetHistoryByPatientIdAsync(It.IsAny<int>()), Times.Never);
+    }
 }
