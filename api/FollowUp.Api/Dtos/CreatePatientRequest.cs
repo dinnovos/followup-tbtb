@@ -18,7 +18,11 @@ public class CreatePatientRequest : IValidatableObject
     [Required, MaxLength(20)]
     public string DocumentNumber { get; set; } = string.Empty;
 
-    [Required, MaxLength(20)]
+    // Digits only, optional leading "+" for a country code, 7-15 digits total --
+    // loose enough to cover Colombia/Peru/Ecuador with or without a country
+    // code, without inventing a per-country format the PRD never specified
+    // (hallazgo: "no phone format defined for a 3-country program").
+    [Required, RegularExpression(@"^\+?[0-9]{7,15}$", ErrorMessage = "Phone must contain only digits (7 to 15), with an optional leading '+'.")]
     public string Phone { get; set; } = string.Empty;
 
     [EmailAddress, MaxLength(150)]

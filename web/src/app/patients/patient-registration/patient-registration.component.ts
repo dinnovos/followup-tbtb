@@ -29,7 +29,7 @@ export class PatientRegistrationComponent implements OnInit {
       country: ['', Validators.required],
       documentType: ['', Validators.required],
       documentNumber: ['', [Validators.required, Validators.maxLength(20)]],
-      phone: ['', [Validators.required, Validators.maxLength(20)]],
+      phone: ['', [Validators.required, Validators.pattern(/^\+?[0-9]{7,15}$/)]],
       email: ['', [Validators.email, Validators.maxLength(150)]],
       city: ['', [Validators.required, Validators.maxLength(100)]],
       treatmentStartDate: ['', Validators.required]
@@ -53,7 +53,15 @@ export class PatientRegistrationComponent implements OnInit {
       return;
     }
 
-    const request = this.form.getRawValue() as CreatePatientRequest;
+    const { email, ...rest } = this.form.getRawValue();
+
+    // email es opcional (DataAnnotations [EmailAddress] en el backend valida
+    // el contenido si el campo está presente, incluso vacío -- un "" real
+    // falla esa validación, distinto de omitir el campo por completo).
+    const request: CreatePatientRequest = {
+      ...rest,
+      ...(email ? { email } : {})
+    };
 
     this.patientsService.registerPatient(request).subscribe({
       next: (patient) => {
