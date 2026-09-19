@@ -17,18 +17,29 @@ used throughout).
 
 ## Prerequisites
 
+- [Git](https://git-scm.com/)
 - [Docker](https://www.docker.com/) (for SQL Server)
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Node.js 18+](https://nodejs.org/) and npm (Angular 17 requires it)
 - A bash-compatible shell (Git Bash on Windows, or a native shell on Linux/Mac)
   for the commands below
 
+## 0. Clone the repository
+
+```bash
+git clone https://github.com/dinnovos/followup-tbtb.git
+cd followup-tbtb
+```
+
 ## 1. Start SQL Server
 
 ```bash
 cp .env.example .env
-# edit .env and set a real password, then load it into this shell:
-export $(cat .env | xargs)
+# edit .env and set a real password, then load it into this shell
+# (the grep drops the comment lines at the top of the file -- passing
+# them straight to export, as `export $(cat .env | xargs)` would,
+# fails because it tries to export each commented-out word too):
+export $(grep -v '^#' .env | xargs)
 
 docker compose up -d
 ```
@@ -60,11 +71,13 @@ for f in scripts/*.sql; do
 done
 ```
 
-This creates `Manager`, `Patient`, `Contact` and `ContactCorrection`, and seeds
-3 managers, 3 patients and 6 contacts (2 per patient) -- all fictional data,
-see `005_seed_data.sql` and `006_seed_contacts.sql`. None of them has been
-corrected yet, so the "Corregido" column will show "No" until you correct one
-yourself (see CA-3 below).
+This creates `Manager`, `Patient`, `Contact` and `ContactCorrection`, adds the
+indexes the contact history query needs (`007_add_contact_history_indexes.sql`
+-- see `03-bitacora.md` for why), and seeds 3 managers, 3 patients and 6
+contacts (2 per patient) -- all fictional data, see `005_seed_data.sql` and
+`006_seed_contacts.sql`. None of them has been corrected yet, so the
+"Corregido" column will show "No" until you correct one yourself (see CA-3
+below).
 
 > **Windows/Git Bash note**: if any `docker exec` command above fails with a
 > path-related error, prefix it with `MSYS_NO_PATHCONV=1` -- Git Bash rewrites
@@ -144,6 +157,9 @@ curl http://localhost:5129/api/patients/6/contacts
 curl -i -X PUT http://localhost:5129/api/contacts/6 \
   -H "Content-Type: application/json" \
   -d '{"correctedByManagerId":4,"reason":""}'
+
+# Error case: history for a patient id that doesn't exist -> 404
+curl -i http://localhost:5129/api/patients/99999/contacts
 ```
 
 Valid values: `channel` is `Call`, `WhatsApp` or `Email`; `result` is
