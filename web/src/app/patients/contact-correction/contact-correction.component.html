@@ -22,6 +22,9 @@
       >
         Debes seleccionar quién hace la corrección.
       </p>
+      <p *ngIf="fieldErrors['correctedByManagerId']" class="text-sm text-red-600">
+        {{ fieldErrors['correctedByManagerId'][0] }}
+      </p>
     </div>
 
     <div>
@@ -50,6 +53,7 @@
       >
         La fecha no puede quedar vacía.
       </p>
+      <p *ngIf="fieldErrors['contactDate']" class="text-sm text-red-600">{{ fieldErrors['contactDate'][0] }}</p>
       <p *ngIf="contactDateChanged" class="text-xs text-amber-700 mt-1">
         Modificado (antes: {{ originalContactDate | date: 'dd/MM/yyyy' }})
       </p>
@@ -63,6 +67,7 @@
         <option value="WhatsApp">WhatsApp</option>
         <option value="Email">Correo</option>
       </select>
+      <p *ngIf="fieldErrors['channel']" class="text-sm text-red-600">{{ fieldErrors['channel'][0] }}</p>
       <p *ngIf="channelChanged" class="text-xs text-amber-700 mt-1">
         Modificado (antes: {{ channelLabel(originalChannel) }})
       </p>
@@ -76,6 +81,7 @@
         <option value="NotAnswered">No contestó</option>
         <option value="DeclinedFollowUp">Rechazó seguimiento</option>
       </select>
+      <p *ngIf="fieldErrors['result']" class="text-sm text-red-600">{{ fieldErrors['result'][0] }}</p>
       <p *ngIf="resultChanged" class="text-xs text-amber-700 mt-1">
         Modificado (antes: {{ resultLabel(originalResult) }})
       </p>

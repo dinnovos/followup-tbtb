@@ -17,6 +17,12 @@
         <option *ngFor="let manager of managers" [ngValue]="manager.id">{{ manager.name }}</option>
       </select>
       <p *ngIf="managers.length === 0" class="text-sm text-gray-500">No hay gestores disponibles.</p>
+      <p
+        *ngIf="form.get('registeredByManagerId')?.invalid && form.get('registeredByManagerId')?.touched"
+        class="text-sm text-red-600"
+      >
+        Debes seleccionar un gestor.
+      </p>
       <p *ngIf="fieldErrors['registeredByManagerId']" class="text-sm text-red-600">
         {{ fieldErrors['registeredByManagerId'][0] }}
       </p>
@@ -25,6 +31,9 @@
     <div>
       <label class="block text-sm font-medium">Nombre</label>
       <input type="text" formControlName="name" class="w-full border rounded p-2" />
+      <p *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="text-sm text-red-600">
+        El nombre es obligatorio.
+      </p>
       <p *ngIf="fieldErrors['name']" class="text-sm text-red-600">{{ fieldErrors['name'][0] }}</p>
     </div>
 
@@ -36,6 +45,10 @@
         <option value="Peru">Perú</option>
         <option value="Ecuador">Ecuador</option>
       </select>
+      <p *ngIf="form.get('country')?.invalid && form.get('country')?.touched" class="text-sm text-red-600">
+        Debes seleccionar un país.
+      </p>
+      <p *ngIf="fieldErrors['country']" class="text-sm text-red-600">{{ fieldErrors['country'][0] }}</p>
     </div>
 
     <div>
@@ -47,11 +60,21 @@
         <option value="CI">Cédula de identidad (CI)</option>
         <option value="Passport">Pasaporte</option>
       </select>
+      <p *ngIf="form.get('documentType')?.invalid && form.get('documentType')?.touched" class="text-sm text-red-600">
+        Debes seleccionar un tipo de documento.
+      </p>
+      <p *ngIf="fieldErrors['documentType']" class="text-sm text-red-600">{{ fieldErrors['documentType'][0] }}</p>
     </div>
 
     <div>
       <label class="block text-sm font-medium">Número de documento</label>
       <input type="text" formControlName="documentNumber" class="w-full border rounded p-2" />
+      <p
+        *ngIf="form.get('documentNumber')?.invalid && form.get('documentNumber')?.touched"
+        class="text-sm text-red-600"
+      >
+        El número de documento es obligatorio.
+      </p>
       <p *ngIf="fieldErrors['documentNumber']" class="text-sm text-red-600">
         {{ fieldErrors['documentNumber'][0] }}
       </p>
@@ -60,24 +83,42 @@
     <div>
       <label class="block text-sm font-medium">Teléfono</label>
       <input type="text" formControlName="phone" class="w-full border rounded p-2" />
+      <p *ngIf="form.get('phone')?.invalid && form.get('phone')?.touched" class="text-sm text-red-600">
+        El teléfono debe tener solo números (7 a 15 dígitos, con "+" opcional al inicio).
+      </p>
       <p *ngIf="fieldErrors['phone']" class="text-sm text-red-600">{{ fieldErrors['phone'][0] }}</p>
     </div>
 
     <div>
       <label class="block text-sm font-medium">Correo (opcional)</label>
       <input type="email" formControlName="email" class="w-full border rounded p-2" />
+      <p *ngIf="form.get('email')?.invalid && form.get('email')?.touched" class="text-sm text-red-600">
+        Ese correo no tiene un formato válido.
+      </p>
       <p *ngIf="fieldErrors['email']" class="text-sm text-red-600">{{ fieldErrors['email'][0] }}</p>
     </div>
 
     <div>
       <label class="block text-sm font-medium">Ciudad</label>
       <input type="text" formControlName="city" class="w-full border rounded p-2" />
+      <p *ngIf="form.get('city')?.invalid && form.get('city')?.touched" class="text-sm text-red-600">
+        La ciudad es obligatoria.
+      </p>
       <p *ngIf="fieldErrors['city']" class="text-sm text-red-600">{{ fieldErrors['city'][0] }}</p>
     </div>
 
     <div>
       <label class="block text-sm font-medium">Fecha de inicio de tratamiento</label>
       <input type="date" formControlName="treatmentStartDate" class="w-full border rounded p-2" />
+      <p
+        *ngIf="form.get('treatmentStartDate')?.invalid && form.get('treatmentStartDate')?.touched"
+        class="text-sm text-red-600"
+      >
+        La fecha de inicio de tratamiento es obligatoria.
+      </p>
+      <p *ngIf="fieldErrors['treatmentStartDate']" class="text-sm text-red-600">
+        {{ fieldErrors['treatmentStartDate'][0] }}
+      </p>
     </div>
 
     <button type="submit" class="w-full bg-blue-600 text-white rounded p-2 font-medium">

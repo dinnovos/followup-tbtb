@@ -19,6 +19,10 @@
         </option>
       </select>
       <p *ngIf="patients.length === 0" class="text-sm text-gray-500">No hay pacientes disponibles.</p>
+      <p *ngIf="form.get('patientId')?.invalid && form.get('patientId')?.touched" class="text-sm text-red-600">
+        Debes seleccionar un paciente.
+      </p>
+      <p *ngIf="fieldErrors['patientId']" class="text-sm text-red-600">{{ fieldErrors['patientId'][0] }}</p>
     </div>
 
     <div>
@@ -28,11 +32,22 @@
         <option *ngFor="let manager of managers" [ngValue]="manager.id">{{ manager.name }}</option>
       </select>
       <p *ngIf="managers.length === 0" class="text-sm text-gray-500">No hay gestores disponibles.</p>
+      <p *ngIf="form.get('managerId')?.invalid && form.get('managerId')?.touched" class="text-sm text-red-600">
+        Debes seleccionar un gestor.
+      </p>
+      <p *ngIf="fieldErrors['managerId']" class="text-sm text-red-600">{{ fieldErrors['managerId'][0] }}</p>
     </div>
 
     <div>
       <label class="block text-sm font-medium">Fecha de contacto</label>
       <input type="date" formControlName="contactDate" class="w-full border rounded p-2" />
+      <p
+        *ngIf="form.get('contactDate')?.invalid && form.get('contactDate')?.touched"
+        class="text-sm text-red-600"
+      >
+        La fecha de contacto es obligatoria.
+      </p>
+      <p *ngIf="fieldErrors['contactDate']" class="text-sm text-red-600">{{ fieldErrors['contactDate'][0] }}</p>
     </div>
 
     <div>
@@ -43,6 +58,10 @@
         <option value="WhatsApp">WhatsApp</option>
         <option value="Email">Correo</option>
       </select>
+      <p *ngIf="form.get('channel')?.invalid && form.get('channel')?.touched" class="text-sm text-red-600">
+        Debes seleccionar un canal.
+      </p>
+      <p *ngIf="fieldErrors['channel']" class="text-sm text-red-600">{{ fieldErrors['channel'][0] }}</p>
     </div>
 
     <div>
@@ -53,6 +72,10 @@
         <option value="NotAnswered">No contestó</option>
         <option value="DeclinedFollowUp">Rechazó seguimiento</option>
       </select>
+      <p *ngIf="form.get('result')?.invalid && form.get('result')?.touched" class="text-sm text-red-600">
+        Debes seleccionar un resultado.
+      </p>
+      <p *ngIf="fieldErrors['result']" class="text-sm text-red-600">{{ fieldErrors['result'][0] }}</p>
     </div>
 
     <div>
